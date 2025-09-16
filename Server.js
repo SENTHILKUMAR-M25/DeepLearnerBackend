@@ -8,7 +8,13 @@ const fs = require("fs");
 const nodemailer = require("nodemailer");
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://deep-learner-hck5.vercel.app/", // Replace with your deployed Vercel URL
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(bodyParser.json());
 
 // ------------------ UPLOADS ------------------
