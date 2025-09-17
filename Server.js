@@ -126,33 +126,39 @@ app.post("/api/enroll", async (req, res) => {
       [name, email, phone, status, courseId]
     );
 
-    // Send admin mail
-    await sendMail(
-      "deeplearneracademy@gmail.com",
-      "📩 New Enrollment",
-      `<h2>${name} enrolled in Course ID: ${courseId}</h2>
-       <p>Email: ${email}</p>
-       <p>Phone: ${phone}</p>
-       <p>Status: ${status}</p>`
-    );
+    // Send admin mail safely
+    try {
+      await sendMail(
+        "deeplearneracademy@gmail.com",
+        "📩 New Enrollment",
+        `<h2>${name} enrolled in Course ID: ${courseId}</h2>
+         <p>Email: ${email}</p>
+         <p>Phone: ${phone}</p>
+         <p>Status: ${status}</p>`
+      );
+    } catch (mailErr) {
+      console.error("Admin mail error:", mailErr);
+    }
 
-    // Send confirmation to student
-    await sendMail(
-      email,
-      "✅ Enrollment Successful",
-      `<h2>Hi ${name},</h2>
-       <p>You are successfully enrolled in course ID: ${courseId}! 🎉</p>
-       <p>Our team will contact you soon.</p>
-       <br/>- Deep Learner Academy Team`
-    );
+    // Send confirmation to student safely
+    try {
+      await sendMail(
+        email,
+        "✅ Enrollment Successful",
+        `<h2>Hi ${name},</h2>
+         <p>You are successfully enrolled in course ID: ${courseId}! 🎉</p>
+         <p>Our team will contact you soon.</p>
+         <br/>- Deep Learner Academy Team`
+      );
+    } catch (mailErr) {
+      console.error("Student mail error:", mailErr);
+    }
 
-    // ✅ Response to client
     res.status(201).json({
       success: true,
       message: "Enrollment successful, confirmation email sent",
       enrollmentId: result.insertId,
     });
-
   } catch (error) {
     console.error("Enrollment Error:", error);
     res.status(500).json({ success: false, message: "Server error, please try again later" });
