@@ -14,9 +14,8 @@ require("dotenv").config();
 // ------------------ CORS ------------------
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: "*", // allow all origins
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
   })
 );
 
