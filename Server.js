@@ -8,9 +8,13 @@ const fs = require("fs");
 const nodemailer = require("nodemailer");
 
 const app = express();
+require("dotenv").config();
+
+
+// ------------------ CORS ------------------
 app.use(
   cors({
-    origin: "https://deep-learner-tsfd.vercel.app",
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -38,30 +42,13 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
 });
 
-// ------------------ EMAIL ------------------
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "deeplearneracademy@gmail.com",
-    pass: "shhpabgusayusyks",
-  },
-});
-function sendMail(to, subject, html) {
-  return transporter.sendMail({
-    from: '"Deep Learner Academy" <deeplearneracademy@gmail.com>',
-    to,
-    subject,
-    html,
-  });
-}
-
 // ------------------ MYSQL ------------------
 const db = mysql.createPool({
-  host: "ballast.proxy.rlwy.net", // your Railway host
-  port:48130,                     // example: must match Railway MySQL port
-  user: "root",                   // Railway username
-  password: "UfUZcvxiMqGuDJnsrzQApucoKzBPrcKm", // from Railway variables
-  database: "railway",            // default database
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
 });
@@ -69,6 +56,24 @@ const db = mysql.createPool({
 db.getConnection()
   .then(() => console.log("✅ MySQL Connected..."))
   .catch((err) => console.error("❌ MySQL Connection Error:", err));
+
+// ------------------ EMAIL ------------------
+const transporter = nodemailer.createTransport({
+  service: process.env.EMAIL_SERVICE,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+function sendMail(to, subject, html) {
+  return transporter.sendMail({
+    from: `"Deep Learner Academy"<${process.env.EMAIL_USER}>`,
+    to,
+    subject,
+    html,
+  });
+}
 
 // ------------------ COURSES ------------------
 app.get("/api/courses", async (req, res) => {
@@ -347,5 +352,5 @@ app.post("/api/demo-request", async (req, res) => {
 });
 
 // ------------------ START SERVER ------------------
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
