@@ -87,21 +87,28 @@ app.get("/api/courses", async (req, res) => {
 
 app.get("/api/courses/:id", async (req, res) => {
   const { id } = req.params;
+
   try {
-    const [results] = await db.query("SELECT * FROM courses WHERE id = ?", [id]);
-    if (!results.length) return res.status(404).json({ error: "Course not found" });
+    const [results] = await db.execute("SELECT * FROM courses WHERE id = ?", [id]);
+
+    if (!results.length) {
+      return res.status(404).json({ error: "Course not found" });
+    }
 
     let course = results[0];
-    if (course.syllabus) {
+
+    if (course.syllabus && typeof course.syllabus === "string") {
       try {
         course.syllabus = JSON.parse(course.syllabus);
       } catch {
         course.syllabus = [];
       }
     }
+
     res.json(course);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("❌ Error fetching course by ID:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
